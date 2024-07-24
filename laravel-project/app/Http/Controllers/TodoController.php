@@ -8,6 +8,9 @@ use App\Models\Todo;
 use App\Models\Task;
 use Auth;
 
+use App\UseCase\Input\CreateTodoInput;
+use App\UseCase\Interactor\CreateTodoInteractor;
+
 
 class TodoController extends Controller
 {
@@ -61,12 +64,20 @@ class TodoController extends Controller
             ->withInput()
             ->withErrors($validator);
         }
-        $data = $request->merge(['user_id' => Auth::user()->id])->all();
-        // create()は最初から用意されている関数
-        // 戻り値は挿入されたレコードの情報
-        $result = Todo::create($request->all());
-        // ルーティング「todo.index」にリクエスト送信（一覧ページに移動）
+
+        $input = new CreateTodoInput(
+            Auth::id(),
+            $request->input('todo'),
+            $request->input('deadline'),
+            $request->input('comment', ''),
+        );
+
+        $createTodoInteractor = new CreateTodoInteractor();
+        $output = $createTodoInteractor->handle($input);
+        
         return redirect()->route('todo.index');
+
+
     }
 
     /**
