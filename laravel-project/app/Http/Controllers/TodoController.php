@@ -9,8 +9,9 @@ use App\Models\Task;
 use Auth;
 
 use App\UseCase\Input\CreateTodoInput;
+use App\UseCase\Input\UpdateTodoInput;
 use App\UseCase\Interactor\CreateTodoInteractor;
-
+use App\UseCase\Interactor\UpdateTodoInteractor;
 
 class TodoController extends Controller
 {
@@ -125,11 +126,17 @@ class TodoController extends Controller
             ->withInput()
             ->withErrors($validator);
         }
-        //データ更新処理
-        // updateは更新する情報がなくても更新が走る（updated_atが更新される）
-        $result = Todo::find($id)->update($request->all());
-        // fill()save()は更新する情報がない場合は更新が走らない（updated_atが更新されない）
-        // $redult = Todo::find($id)->fill($request->all())->save();
+
+        $input = new UpdateTodoInput(
+            $id,
+            $request->input('todo'),
+            $request->input('deadline'),
+            $request->input('comment', '')
+        );
+
+        $updateTodoInteractor = new UpdateTodoInteractor();
+        $output = $updateTodoInteractor->handle($input);
+        
         return redirect()->route('todo.index');
     }
 
