@@ -76,7 +76,7 @@ class TodoController extends Controller
         );
 
         $createTodoInteractor = new CreateTodoInteractor();
-        $output = $createTodoInteractor->handle($input);
+        $createTodoInteractor->handle($input);
         
         return redirect()->route('todo.index');
 
