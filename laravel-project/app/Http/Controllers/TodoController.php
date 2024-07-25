@@ -9,8 +9,10 @@ use App\Models\Task;
 use Auth;
 
 use App\UseCase\Input\CreateTodoInput;
+use App\UseCase\Input\DeleteTodoInput;
 use App\UseCase\Input\UpdateTodoInput;
 use App\UseCase\Interactor\CreateTodoInteractor;
+use App\UseCase\Interactor\DeleteTodoInteractor;
 use App\UseCase\Interactor\UpdateTodoInteractor;
 
 class TodoController extends Controller
@@ -148,7 +150,10 @@ class TodoController extends Controller
      */
     public function destroy($id)
     {
-        $result = Todo::find($id)->delete();
+        $input = new DeleteTodoInput($id);
+        $deleteTodoInteractor = new DeleteTodoInteractor();
+        $deleteTodoInteractor->handle($input);
+
         return redirect()->route('todo.index');
     }
 }
