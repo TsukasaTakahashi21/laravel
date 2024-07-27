@@ -33,5 +33,5 @@ bash:
 	HOST_UID=$(HOST_UID) HOST_GID=$(HOST_GID) docker compose exec app bash
 
 .PHONY: bash-root
-bash-root:
+bash-root:d
 	HOST_UID=$(HOST_UID) HOST_GID=$(HOST_GID) docker compose exec -u 0 app bash
