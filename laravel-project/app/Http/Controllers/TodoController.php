@@ -8,6 +8,12 @@ use App\Models\Todo;
 use App\Models\Task;
 use Auth;
 
+use App\UseCase\Input\CreateTodoInput;
+use App\UseCase\Input\DeleteTodoInput;
+use App\UseCase\Input\UpdateTodoInput;
+use App\UseCase\Interactor\CreateTodoInteractor;
+use App\UseCase\Interactor\DeleteTodoInteractor;
+use App\UseCase\Interactor\UpdateTodoInteractor;
 
 class TodoController extends Controller
 {
@@ -61,12 +67,20 @@ class TodoController extends Controller
             ->withInput()
             ->withErrors($validator);
         }
-        $data = $request->merge(['user_id' => Auth::user()->id])->all();
-        // create()は最初から用意されている関数
-        // 戻り値は挿入されたレコードの情報
-        $result = Todo::create($request->all());
-        // ルーティング「todo.index」にリクエスト送信（一覧ページに移動）
+
+        $input = new CreateTodoInput(
+            Auth::id(),
+            $request->input('todo'),
+            $request->input('deadline'),
+            $request->input('comment', ''),
+        );
+
+        $createTodoInteractor = new CreateTodoInteractor();
+        $output = $createTodoInteractor->handle($input);
+        
         return redirect()->route('todo.index');
+
+
     }
 
     /**
@@ -114,11 +128,17 @@ class TodoController extends Controller
             ->withInput()
             ->withErrors($validator);
         }
-        //データ更新処理
-        // updateは更新する情報がなくても更新が走る（updated_atが更新される）
-        $result = Todo::find($id)->update($request->all());
-        // fill()save()は更新する情報がない場合は更新が走らない（updated_atが更新されない）
-        // $redult = Todo::find($id)->fill($request->all())->save();
+
+        $input = new UpdateTodoInput(
+            $id,
+            $request->input('todo'),
+            $request->input('deadline'),
+            $request->input('comment', '')
+        );
+
+        $updateTodoInteractor = new UpdateTodoInteractor();
+        $output = $updateTodoInteractor->handle($input);
+        
         return redirect()->route('todo.index');
     }
 
@@ -130,7 +150,10 @@ class TodoController extends Controller
      */
     public function destroy($id)
     {
-        $result = Todo::find($id)->delete();
+        $input = new DeleteTodoInput($id);
+        $deleteTodoInteractor = new DeleteTodoInteractor();
+        $deleteTodoInteractor->handle($input);
+
         return redirect()->route('todo.index');
     }
 }
